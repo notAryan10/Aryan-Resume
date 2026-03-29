@@ -26,5 +26,6 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: ['three', 'gsap', 'lenis']
-  }
+  },
+  assetsInclude: ['**/*.glb', '**/*.gltf', '**/*.hdr']
 });
