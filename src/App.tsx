@@ -17,9 +17,9 @@ const App = () => {
           path="/"
           element={
             <LoadingProvider>
-              <Suspense>
+              <Suspense fallback={<div>Loading...</div>}>
                 <MainContainer>
-                  <Suspense>
+                  <Suspense fallback={null}>
                     <CharacterModel />
                   </Suspense>
                 </MainContainer>
