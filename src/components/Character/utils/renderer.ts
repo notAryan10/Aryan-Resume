@@ -3,16 +3,28 @@ import * as THREE from "three";
 let renderer: THREE.WebGLRenderer | null = null;
 
 export const getRenderer = (containerWidth: number, containerHeight: number) => {
+  if (typeof window !== "undefined" && !window.WebGLRenderingContext) {
+    console.error("WebGL not supported");
+    return null;
+  }
+
   if (!renderer) {
     renderer = new THREE.WebGLRenderer({
+      antialias: false,                // IMPORTANT (antialias = heavy)
       alpha: true,
-      antialias: window.devicePixelRatio < 2,
       powerPreference: "high-performance",
-      precision: "mediump",
+      stencil: false,
+      depth: true,
+      failIfMajorPerformanceCaveat: false,
+      preserveDrawingBuffer: false,
     });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1;
+
+    // Disable heavy stuff
+    renderer.shadowMap.enabled = false;   // <- BIG one
   }
   
   renderer.setSize(containerWidth, containerHeight);

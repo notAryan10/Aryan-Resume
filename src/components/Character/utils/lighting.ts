@@ -6,11 +6,7 @@ const setLighting = (scene: THREE.Scene) => {
   const directionalLight = new THREE.DirectionalLight(0xc7a9ff, 0);
   directionalLight.intensity = 0;
   directionalLight.position.set(-0.47, -0.32, -1);
-  directionalLight.castShadow = true;
-  directionalLight.shadow.mapSize.width = 512; 
-  directionalLight.shadow.mapSize.height = 512;
-  directionalLight.shadow.camera.near = 0.5;
-  directionalLight.shadow.camera.far = 50;
+  directionalLight.castShadow = false;
   scene.add(directionalLight);
 
   const pointLight = new THREE.PointLight(0xc2a4ff, 0, 100, 3);
