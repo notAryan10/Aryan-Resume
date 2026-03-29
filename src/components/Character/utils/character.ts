@@ -31,11 +31,15 @@ const setCharacter = (
             character.traverse((child: any) => {
               if (child.isMesh) {
                 const mesh = child as THREE.Mesh;
-                child.castShadow = false;
+                child.castShadow = false; 
                 child.receiveShadow = false;
                 mesh.frustumCulled = true;
-                if (mesh.material && !Array.isArray(mesh.material)) {
-                  (mesh.material as THREE.ShaderMaterial).precision = 'mediump';
+                if (mesh.material) {
+                  const materials = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
+                  materials.forEach((mat: any) => {
+                    mat.precision = 'mediump'; 
+                    if (mat.map) mat.map.anisotropy = renderer.capabilities.getMaxAnisotropy();
+                  });
                 }
               }
             });
