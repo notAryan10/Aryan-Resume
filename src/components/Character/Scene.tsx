@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import setCharacter from "./utils/character";
 import setLighting from "./utils/lighting";
@@ -19,20 +19,12 @@ const Scene = () => {
   const sceneRef = useRef(new THREE.Scene());
   const { setLoading } = useLoading();
 
-  const [character, setChar] = useState<THREE.Object3D | null>(null);
   useEffect(() => {
     let isMounted = true;
     let frameId: number;
     let debounce: number | undefined;
 
     if (canvasDiv.current) {
-      const canvas = document.createElement("canvas");
-      const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl");
-      if (!gl) {
-        alert("WebGL is not supported on this device. Please use a modern browser.");
-        return;
-      }
-
       let rect = canvasDiv.current.getBoundingClientRect();
       let container = { width: rect.width, height: rect.height };
       const aspect = container.width / container.height;
@@ -72,7 +64,6 @@ const Scene = () => {
         hoverDivRef.current && animations.hover(gltf, hoverDivRef.current);
         mixer = animations.mixer;
         let character = gltf.scene;
-        setChar(character);
         scene.add(character);
         headBone = character.getObjectByName("spine006") || null;
         screenLight = character.getObjectByName("screenlight") || null;
@@ -86,9 +77,17 @@ const Scene = () => {
           }, 2500);
         });
 
-        window.addEventListener("resize", () =>
-          handleResize(renderer, camera, canvasDiv, character)
-        );
+        const onResize = () => {
+          if (isMounted) {
+            handleResize(renderer, camera, canvasDiv, character);
+          }
+        };
+
+        window.addEventListener("resize", onResize);
+        
+        // Store onResize on renderer for cleanup access if needed, 
+        // or just use a shared variable in the effect scope.
+        (renderer as any)._onResize = onResize;
       });
 
       let mouse = { x: 0, y: 0 },
@@ -170,10 +169,15 @@ const Scene = () => {
 
         scene.clear();
         renderer.dispose();
+        renderer.forceContextLoss();
+        const gl = renderer.getContext();
+        if (gl) {
+          gl.getExtension("WEBGL_lose_context")?.loseContext();
+        }
 
-        window.removeEventListener("resize", () =>
-          handleResize(renderer, camera, canvasDiv, character!)
-        );
+        if ((renderer as any)._onResize) {
+          window.removeEventListener("resize", (renderer as any)._onResize);
+        }
         if (canvasDiv.current && renderer.domElement) {
           canvasDiv.current.removeChild(renderer.domElement);
         }
