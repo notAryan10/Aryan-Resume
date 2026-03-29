@@ -20,4 +20,9 @@ export const getRenderer = (containerWidth: number, containerHeight: number) => 
 };
 
 export const disposeRenderer = () => {
+  if (renderer) {
+    renderer.dispose();
+    renderer.forceContextLoss();
+    renderer = null;
+  }
 };

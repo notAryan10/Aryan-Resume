@@ -4,7 +4,7 @@ import setCharacter from "./utils/character";
 import setLighting from "./utils/lighting";
 import { useLoading } from "../../context/LoadingProvider";
 import handleResize from "./utils/resizeUtils";
-import { getRenderer } from "./utils/renderer";
+import { getRenderer, disposeRenderer } from "./utils/renderer";
 import {
   handleMouseMove,
   handleTouchEnd,
@@ -138,7 +138,7 @@ const Scene = () => {
         isMounted = false;
         cancelAnimationFrame(frameId);
         clearTimeout(debounce);
-        
+
         scene.traverse((object: any) => {
           if (object.isMesh) {
             object.geometry.dispose();
@@ -160,9 +160,9 @@ const Scene = () => {
         }
 
         scene.clear();
-        
-        // We do NOT dispose the renderer as it is a singleton.
-        // We only remove its DOM element from the current parent.
+
+        // THIS IS THE IMPORTANT PART
+        disposeRenderer();
 
         if ((renderer as any)._onResize) {
           window.removeEventListener("resize", (renderer as any)._onResize);
