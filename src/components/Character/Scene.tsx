@@ -4,6 +4,7 @@ import setCharacter from "./utils/character";
 import setLighting from "./utils/lighting";
 import { useLoading } from "../../context/LoadingProvider";
 import handleResize from "./utils/resizeUtils";
+import { getRenderer } from "./utils/renderer";
 import {
   handleMouseMove,
   handleTouchEnd,
@@ -30,16 +31,8 @@ const Scene = () => {
       
       const scene = new THREE.Scene();
 
-      const renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: window.devicePixelRatio < 2, 
-        powerPreference: "high-performance",
-        precision: "mediump" 
-      });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5)); 
-      renderer.setSize(container.width, container.height);
-      renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1;
+
+      const renderer = getRenderer(container.width, container.height);
       canvasDiv.current.appendChild(renderer.domElement);
 
       const camera = new THREE.PerspectiveCamera(14.5, aspect, 0.1, 1000);
@@ -167,12 +160,9 @@ const Scene = () => {
         }
 
         scene.clear();
-        renderer.dispose();
-        renderer.forceContextLoss();
-        const gl = renderer.getContext();
-        if (gl) {
-          gl.getExtension("WEBGL_lose_context")?.loseContext();
-        }
+        
+        // We do NOT dispose the renderer as it is a singleton.
+        // We only remove its DOM element from the current parent.
 
         if ((renderer as any)._onResize) {
           window.removeEventListener("resize", (renderer as any)._onResize);
